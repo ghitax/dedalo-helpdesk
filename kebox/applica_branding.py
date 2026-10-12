@@ -66,6 +66,16 @@ sostituisci("src/lang.rs",
             '                if !app_name.contains("RustDesk") {\n'
             f'                    s = s.replace("RustDesk", "{NOME_VISIBILE}");')
 
+# --- installer MSI: collegamenti e testi con il nome visibile ---
+# preprocess.py sostituirebbe "RustDesk" con il nome tecnico; qui lo anticipiamo col nome visibile.
+# Resta tecnico solo SC_Client_Tray: TryDeleteStartupShortcut lo cerca come "$(var.Product) Tray".
+for wxl in sorted((RADICE / "res/msi/Package/Language").glob("*.wxl")):
+    righe = wxl.read_text(encoding="utf-8").splitlines(keepends=True)
+    nuove = [r if 'Id="SC_Client_Tray"' in r else r.replace("RustDesk", NOME_VISIBILE) for r in righe]
+    if nuove != righe:
+        wxl.write_text("".join(nuove), encoding="utf-8", newline="")
+        print(f"ok  {wxl.relative_to(RADICE)}")
+
 # --- icone e logo ---
 copia("tray-icon.ico", "res/tray-icon.ico")
 copia("icon.ico", "res/icon.ico",
